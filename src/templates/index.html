@@ -1,43 +1,311 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <link rel="stylesheet" href="/src/static/styles.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyLog</title>
+    <title>EasyLog - Temperature Logger</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="gen">
-    <div class="header">
-        <h1 class="title">Εισαγωγή Αρχείου Καταγραφής</h1>
-    </div>
-    <div class="upload">
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <!-- Βήμα 1: File Selection -->
-            <div class="file-upload-container">
-                <input class="file" type="file" name="file">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07"/>
+                </svg>
+                <span>EasyLog</span>
             </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    <span>Analytics</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <span>Settings</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="temp-range-info">
+                    <span class="range-label">Acceptable Range</span>
+                    <span class="range-value">18°C - 22°C</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1>Temperature Log Analyzer</h1>
+                    <p class="subtitle">Upload your temperature logs and visualize the data</p>
+                </div>
+                <div class="header-right">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span>Ready</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <!-- Upload Section -->
+                <section class="card upload-card">
+                    <div class="card-header">
+                        <div class="card-icon upload-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>Upload Log File</h2>
+                            <p>CSV or TXT format supported</p>
+                        </div>
+                    </div>
+                    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                        <div class="dropzone" id="dropzone">
+                            <input type="file" name="file" id="fileInput" accept=".csv,.txt" hidden>
+                            <div class="dropzone-content">
+                                <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <p class="dropzone-text">Drag and drop your file here</p>
+                                <p class="dropzone-subtext">or click to browse</p>
+                                <span class="file-name" id="fileName"></span>
+                            </div>
+                        </div>
+                </section>
+
+                <!-- Time Range Section -->
+                <section class="card time-card">
+                    <div class="card-header">
+                        <div class="card-icon time-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M12 6v6l4 2"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2>Time Range</h2>
+                            <p>Filter data by date and time</p>
+                        </div>
+                    </div>
+                    <div class="time-inputs">
+                        <div class="input-group">
+                            <label for="start_time">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                Start Time
+                            </label>
+                            <input type="datetime-local" name="start_time" id="start_time" form="uploadForm">
+                        </div>
+                        <div class="input-group">
+                            <label for="end_time">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                End Time
+                            </label>
+                            <input type="datetime-local" name="end_time" id="end_time" form="uploadForm">
+                        </div>
+                    </div>
+                    <button type="button" class="btn-clear" onclick="clearTimeInputs()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        Clear Time Range
+                    </button>
+                </section>
+
+                <!-- Submit Section -->
+                <section class="card submit-card">
+                    <div class="submit-content">
+                        <div class="submit-info">
+                            <h2>Generate Report</h2>
+                            <p>Analyze temperature data and download the visualization chart</p>
+                        </div>
+                        <button type="submit" form="uploadForm" class="btn-submit" id="submitBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                            <span>Analyze & Download</span>
+                        </button>
+                    </div>
+                    <div class="features">
+                        <div class="feature">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Temperature visualization</span>
+                        </div>
+                        <div class="feature">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>Range compliance check</span>
+                        </div>
+                        <div class="feature">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>PNG chart download</span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Result Section (for AJAX results) -->
+            <section class="card result-card" id="resultCard" style="display: none;">
+                <div class="card-header">
+                    <div class="card-icon result-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2>Analysis Result</h2>
+                        <p>Temperature chart visualization</p>
+                    </div>
+                </div>
+                <div class="result-content">
+                    <img id="resultImage" src="" alt="Temperature Chart">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader">
+            <div class="loader-spinner"></div>
+            <p>Analyzing data...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const resultCard = document.getElementById('resultCard');
+        const resultImage = document.getElementById('resultImage');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // Dropzone click
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                updateFileName();
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', updateFileName);
+
+        function updateFileName() {
+            if (fileInput.files.length) {
+                fileName.textContent = fileInput.files[0].name;
+                dropzone.classList.add('has-file');
+            } else {
+                fileName.textContent = '';
+                dropzone.classList.remove('has-file');
+            }
+        }
+
+        function clearTimeInputs() {
+            document.getElementById('start_time').value = '';
+            document.getElementById('end_time').value = '';
+            showToast('Time range cleared', 'info');
+        }
+
+        function showToast(message, type = 'error') {
+            toastMessage.textContent = message;
+            toast.className = 'toast show ' + type;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 4000);
+        }
+
+        // Form submission with AJAX
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            <!-- Βήμα 2: Time Selection -->
-            <div class="setTime">
-                <h1 class="timeTitle">Βήμα 2 : Επέλεξε Χρονική Περίοδο</h1>
-                <div class="startTime">
-                    <label for="start_time">Start Time:</label>
-                    <input type="datetime-local" name="start_time" id="start_time">
-                </div>
-                <div class="endTime">
-                    <label for="end_time">End Time:</label>
-                    <input type="datetime-local" name="end_time" id="end_time">
-                </div>
-            </div>
-            <script>console.log("new new")</script>
-            <!-- Βήμα 3: Upload Button -->
-            <div class="file-upload-container">
-                <input class="upfile" type="submit" value="Βήμα 3: Ανέβασε το Αρχείο">
-            </div>
-        </form>
-    </div>
-</div>
+            if (!fileInput.files.length) {
+                showToast('Please select a file first', 'error');
+                return;
+            }
+
+            loadingOverlay.classList.add('show');
+            
+            const formData = new FormData(uploadForm);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    resultImage.src = imageUrl;
+                    resultCard.style.display = 'block';
+                    resultCard.scrollIntoView({ behavior: 'smooth' });
+                    showToast('Analysis complete!', 'success');
+                    
+                    // Auto download
+                    const link = document.createElement('a');
+                    link.href = imageUrl;
+                    link.download = 'temperature_chart.png';
+                    link.click();
+                } else {
+                    const errorText = await response.text();
+                    showToast(errorText || 'An error occurred', 'error');
+                }
+            } catch (error) {
+                showToast('Network error. Please try again.', 'error');
+            } finally {
+                loadingOverlay.classList.remove('show');
+            }
+        });
+    </script>
 </body>
 </html>
