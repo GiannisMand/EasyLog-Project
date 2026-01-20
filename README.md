@@ -1,4 +1,4 @@
-
+..
 -EasyPlot is a web application developed using Flask that allows users to upload CSV files containing temperature readings.
 The application generates a plot visualizing the temperature data, highlighting areas where the temperature falls within a specified range.
 Users can also specify a time range for filtering the data before generating the plot.
